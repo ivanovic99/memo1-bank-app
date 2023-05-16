@@ -3,7 +3,9 @@ package com.aninfo.service;
 import com.aninfo.exceptions.DepositNegativeSumException;
 import com.aninfo.exceptions.InsufficientFundsException;
 import com.aninfo.model.Account;
+import com.aninfo.model.Transaction;
 import com.aninfo.repository.AccountRepository;
+import com.aninfo.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,8 @@ public class AccountService {
 
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     public Account createAccount(Account account) {
         return accountRepository.save(account);
@@ -38,29 +42,24 @@ public class AccountService {
     }
 
     @Transactional
-    public Account withdraw(Long cbu, Double sum) {
+    public Account withdraw(Long cbu, Double amount) {
         Account account = accountRepository.findAccountByCbu(cbu);
-
-        if (account.getBalance() < sum) {
-            throw new InsufficientFundsException("Insufficient funds");
-        }
-
-        account.setBalance(account.getBalance() - sum);
+        Transaction transaction = new Transaction(cbu, amount, "Withdraw");
+        transaction.withdrawTransaction(account);
         accountRepository.save(account);
+        transactionRepository.createTransaction(transaction);
 
         return account;
     }
 
     @Transactional
-    public Account deposit(Long cbu, Double sum) {
-
-        if (sum <= 0) {
-            throw new DepositNegativeSumException("Cannot deposit negative sums");
-        }
+    public Account deposit(Long cbu, Double amount) {
 
         Account account = accountRepository.findAccountByCbu(cbu);
-        account.setBalance(account.getBalance() + sum);
+        Transaction transaction = new Transaction(cbu, amount, "Deposit");
+        transaction.depositTransaction(account);
         accountRepository.save(account);
+        transactionRepository.createTransaction(transaction);
 
         return account;
     }

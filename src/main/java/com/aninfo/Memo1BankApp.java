@@ -1,7 +1,9 @@
 package com.aninfo;
 
 import com.aninfo.model.Account;
+import com.aninfo.model.Transaction;
 import com.aninfo.service.AccountService;
+import com.aninfo.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,7 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.List;
 import java.util.Collection;
 import java.util.Optional;
 import springfox.documentation.builders.PathSelectors;
@@ -26,6 +28,8 @@ public class Memo1BankApp {
 
 	@Autowired
 	private AccountService accountService;
+	@Autowired
+	private TransactionService transactionService;
 
 	public static void main(String[] args) {
 		SpringApplication.run(Memo1BankApp.class, args);
@@ -65,22 +69,61 @@ public class Memo1BankApp {
 		accountService.deleteById(cbu);
 	}
 
-	@PutMapping("/accounts/{cbu}/withdraw")
-	public Account withdraw(@PathVariable Long cbu, @RequestParam Double sum) {
-		return accountService.withdraw(cbu, sum);
+//	@PutMapping("/accounts/{cbu}/withdraw")
+//	public Account withdraw(@PathVariable Long cbu, @RequestParam Double sum) {
+//		return accountService.withdraw(cbu, sum);
+//	}
+//
+//	@PutMapping("/accounts/{cbu}/deposit")
+//	public Account deposit(@PathVariable Long cbu, @RequestParam Double sum) {
+//		return accountService.deposit(cbu, sum);
+//	}
+
+	@PostMapping("/transactions/{cbu}/deposit/{amount}")
+	@ResponseStatus(HttpStatus.CREATED)
+	public Account createTransactionDeposit(@PathVariable Long cbu, @RequestParam Double amount) {
+		return accountService.deposit(cbu, amount);
 	}
 
-	@PutMapping("/accounts/{cbu}/deposit")
-	public Account deposit(@PathVariable Long cbu, @RequestParam Double sum) {
-		return accountService.deposit(cbu, sum);
+	@PostMapping("/transactions/{cbu}/withdraw/{amount}")
+	@ResponseStatus(HttpStatus.CREATED)
+	public Account createTransactionWithdraw(@PathVariable Long cbu, @RequestParam Double amount) {
+		return accountService.withdraw(cbu, amount);
 	}
+
+	@GetMapping("/transactions")
+	public List<Transaction> getTransactions() {
+		List<Transaction> transaction= transactionService.getTransactions();
+		return transaction;
+	}
+
+	@GetMapping("/transactions/{id}")
+	public Transaction getTransaction(@RequestParam Long id) {
+		Transaction transaction= transactionService.getTransactionById(id);
+		return transaction;
+	}
+
+
+	@GetMapping("/transactions/{cbu}")
+	public Collection<Transaction> getTransactionsByAccount(@RequestParam Long cbu) {
+		return transactionService.getTransactionsByAccount(cbu);
+	}
+
+	@DeleteMapping("/transactions/{id}")
+	public void deleteTransaction(@RequestParam Long id) {
+		transactionService.eliminateTransaction(id);
+	}
+
+
 
 	@Bean
 	public Docket apiDocket() {
 		return new Docket(DocumentationType.SWAGGER_2)
-			.select()
-			.apis(RequestHandlerSelectors.any())
-			.paths(PathSelectors.any())
-			.build();
+				.select()
+				.apis(RequestHandlerSelectors.any())
+				.paths(PathSelectors.any())
+				.build();
 	}
+
+
 }

@@ -24,7 +24,7 @@ Feature: Bank account operations
     And Account balance should remain 200
 
 
-Feature: Bank account promo, get 10% extra in your $2000+ deposits, up to $500
+#Feature: Bank account promo, get 10% extra in your $2000+ deposits, up to $500
 
   Scenario: Successfully promo applied, cap not reached.
     Given Account with a balance of 0
@@ -40,3 +40,4 @@ Feature: Bank account promo, get 10% extra in your $2000+ deposits, up to $500
     Given Account with a balance of 0
     When Trying to deposit 1500
     Then Account balance should be 1500
+
